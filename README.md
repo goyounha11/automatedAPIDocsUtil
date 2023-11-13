@@ -39,7 +39,7 @@
     1st param : Tag
     2nd param : Identifier
     3rd param : Api description
-    4rd param : ResultAction for generate snippets
+    4th param : ResultAction for generate snippets
 ```
 - you can using gradle task
 ```
