@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
-    id("com.epages.restdocs-api-spec") version "0.15.3"
+    id("com.epages.restdocs-api-spec") version "0.18.2"
     id("org.hidetake.swagger.generator") version "2.19.2"
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
@@ -33,13 +33,17 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-
-    compileOnly("org.springframework.boot:spring-boot-starter-test")
-    compileOnly("com.epages:restdocs-api-spec-mockmvc:0.15.3")
+    testImplementation ("org.springframework.restdocs:spring-restdocs-mockmvc")
+    testImplementation("com.epages:restdocs-api-spec-mockmvc:0.18.2")
 
     swaggerCodegen("io.swagger.codegen.v3:swagger-codegen-cli:3.0.44")
     swaggerUI("org.webjars:swagger-ui:4.1.3")
+
+    compileOnly("org.springframework.boot:spring-boot-starter-test")
+    compileOnly ("org.springframework.restdocs:spring-restdocs-mockmvc")
+    compileOnly("com.epages:restdocs-api-spec-mockmvc:0.18.2")
 }
+
 
 val snippetsDir by extra {
     file("${layout.buildDirectory}/generated-snippets")
@@ -61,7 +65,9 @@ openapi3 {
 
 swaggerSources {
     create("convert") {
-        setInputFile(file("${layout.buildDirectory}/api-spec/openapi3.json"))
+        println("asd")
+        println("$layout.buildDirectory")
+        setInputFile(file("$buildDir/api-spec/openapi3.json"))
         code.language = "html"
 
         ui.doLast {
