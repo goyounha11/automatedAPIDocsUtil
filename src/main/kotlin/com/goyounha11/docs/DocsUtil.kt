@@ -34,18 +34,12 @@ object DocsUtil {
         val responseNode: JsonNode? = response.contentAsString.let { jacksonObjectMapper().readTree(response.contentAsString) }
         val responseFieldDescriptors = createFieldDescriptors(responseNode)
 
-        val requestParameter: List<ParameterDescriptorWithType> = createRequestParameters(request)
+        val requestParameter = createRequestParameters(request)
         val requestPathParameter = createPathParameters(request)
 
         resourceSnippetParametersBuilder.requestFields(requestFieldDescriptors)
-
-        if(requestParameter.isNotEmpty()) {
-            resourceSnippetParametersBuilder.queryParameters(requestParameter)
-        }
-        if(requestPathParameter.isNotEmpty()) {
-            resourceSnippetParametersBuilder.pathParameters(requestPathParameter)
-        }
-
+        resourceSnippetParametersBuilder.queryParameters(requestParameter)
+        resourceSnippetParametersBuilder.pathParameters(requestPathParameter)
         resourceSnippetParametersBuilder.responseFields(responseFieldDescriptors)
 
         return document(
