@@ -27,15 +27,17 @@ object DocsUtil {
         val resourceSnippetParametersBuilder = ResourceSnippetParametersBuilder().tags(tag).description(description)
 
         val request = resultActions.andReturn().request
-        val requestNode: JsonNode? = request.contentAsString?.let { jacksonObjectMapper().readTree(request.contentAsString) }
+        val requestNode: JsonNode? =
+            request.contentAsString?.let { jacksonObjectMapper().readTree(request.contentAsString) }
         val requestFieldDescriptors = createFieldDescriptors(requestNode)
 
         val response = resultActions.andReturn().response
-        val responseNode: JsonNode? = response.contentAsString.let { jacksonObjectMapper().readTree(response.contentAsString) }
+        val responseNode: JsonNode? =
+            response.contentAsString.let { jacksonObjectMapper().readTree(response.contentAsString) }
         val responseFieldDescriptors = createFieldDescriptors(responseNode)
 
-        val requestParameter = createRequestParameters(request)
-        val requestPathParameter = createPathParameters(request)
+        val requestParameter = createParameters(request, ParameterType.QUERY)
+        val requestPathParameter = createParameters(request, ParameterType.PATH)
 
         resourceSnippetParametersBuilder.requestFields(requestFieldDescriptors)
         resourceSnippetParametersBuilder.queryParameters(requestParameter)
@@ -66,17 +68,20 @@ object DocsUtil {
                 value.isObject -> {
                     fieldDescriptors.addAll(createFieldDescriptors(value, path))
                 }
+
                 value.isArray -> {
                     value.forEachIndexed { index, item ->
                         if (item.isObject) {
                             fieldDescriptors.addAll(createFieldDescriptors(item, "$path.[]."))
                         } else {
                             fieldDescriptors.add(
-                                PayloadDocumentation.fieldWithPath("$path.[].").description("An element of $path at index $index")
+                                PayloadDocumentation.fieldWithPath("$path.[].")
+                                    .description("An element of $path at index $index")
                             )
                         }
                     }
                 }
+
                 else -> {
                     fieldDescriptors.add(
                         PayloadDocumentation.fieldWithPath(path).description(value.asText())
@@ -88,21 +93,24 @@ object DocsUtil {
         return fieldDescriptors
     }
 
-    private fun createRequestParameters(request: MockHttpServletRequest): List<ParameterDescriptorWithType> {
-        val parameterDescriptors = request.parameterMap.map { (key, value) ->
-            parameterWithName(key).description("Value: ${value.joinToString()}")
+    private fun createParameters(
+        request: MockHttpServletRequest,
+        type: ParameterType
+    ): List<ParameterDescriptorWithType> {
+        return if (type == ParameterType.QUERY) {
+            request.parameterMap.map { (key, value) ->
+                parameterWithName(key).description("Value: ${value.joinToString()}")
+            }
+        } else {
+            val uriVars = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as? Map<*, *>
+
+            return uriVars?.entries?.map { (key, value) ->
+                parameterWithName(key.toString()).description("$value")
+            }?.toList() ?: listOf()
         }
-
-        return parameterDescriptors
     }
-
-    private fun createPathParameters(request: MockHttpServletRequest): List<ParameterDescriptorWithType> {
-        val uriVars = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as? Map<*, *>
-
-        val descriptors = uriVars?.entries?.map { (key, value) ->
-            parameterWithName(key.toString()).description("$value")
-        }?.toList() ?: listOf()
-
-        return descriptors
-    }
+}
+private enum class ParameterType {
+    PATH,
+    QUERY
 }
