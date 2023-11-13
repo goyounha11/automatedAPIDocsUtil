@@ -26,9 +26,7 @@ import org.springframework.web.filter.CharacterEncodingFilter
 @AutoConfigureMockMvc
 @ExtendWith(RestDocumentationExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-internal class UserApiTest @Autowired constructor(
-
-){
+internal class UserApiTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 

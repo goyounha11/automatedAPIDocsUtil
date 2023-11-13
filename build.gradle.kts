@@ -46,27 +46,25 @@ dependencies {
 
 
 val snippetsDir by extra {
-    file("${layout.buildDirectory}/generated-snippets")
+    file("$buildDir/generated-snippets")
 }
 
 val swaggerDir by extra {
-    file("${layout.buildDirectory}/swagger-ui-convert")
+    file("$buildDir/swagger-ui-convert")
 }
 
 val activeProfile = project.findProperty("spring.profiles.active") as? String ?: "local"
 
 openapi3 {
-    this.setServer(getClientServerUrl(activeProfile))
-    title = "MapleBoss Api Document"
-    description = "MapleBoss API"
+    this.setServer(getServerUrl(activeProfile))
+    title = "Api Document"
+    description = "API"
     version = "0.1.1"
     format = "json"
 }
 
 swaggerSources {
     create("convert") {
-        println("asd")
-        println("$layout.buildDirectory")
         setInputFile(file("$buildDir/api-spec/openapi3.json"))
         code.language = "html"
 
@@ -89,6 +87,7 @@ tasks {
 
     test {
         outputs.dir(snippetsDir)
+        useJUnitPlatform()
     }
 
     withType<KotlinCompile> {
@@ -100,15 +99,15 @@ tasks {
 
     register<Copy>("moveSwaggerFiles") {
         dependsOn("generateSwaggerUIConvert")
-        from("${layout.buildDirectory}/swagger-ui-convert")
-        into("${layout.buildDirectory}/resources/main/static/docs/")
+        from("$buildDir/swagger-ui-convert")
+        into("$buildDir/resources/main/static/docs/")
     }
 }
 
-fun getClientServerUrl(profile: String): String {
+fun getServerUrl(profile: String): String {
     return when (profile) {
         "local" -> "http://localhost:8080"
-        "dev" -> "https://dev-api.mapleboss.io"
+        "dev" -> "somedevurl"
         else -> "http://localhost:8000"
     }
 }
