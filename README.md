@@ -7,7 +7,7 @@
 ### 2.create controller test
 - follow like this
 ```
-    fun `회원 가입`() {
+    fun `join_member`() {
         val req = UserCreateRequest("test@test.com", "1234", "테스터")
 
         val resultAction = mockMvc.perform(
