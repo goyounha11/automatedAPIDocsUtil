@@ -1,6 +1,8 @@
 HELP.md
 .gradle
 build/
+scripts/
+local.properties
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -35,6 +37,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-scripts/
-local.properties
