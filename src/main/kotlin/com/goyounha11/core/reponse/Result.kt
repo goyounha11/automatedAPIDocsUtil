@@ -5,19 +5,14 @@ import org.springframework.http.ResponseEntity
 
 class Result {
     companion object {
-        fun created(): ResponseEntity<ApiResult<*>> =
-            ResponseEntity.status(201).body(ApiResult.of(ErrorCode.SUCCESS_NORMAL))
+        fun created(): ApiResult<*> =ApiResult.of(ErrorCode.SUCCESS_NORMAL)
 
-        fun <T> created(data: T): ResponseEntity<ApiResult<T>> =
-            ResponseEntity.status(201).body(ApiResult.of(ErrorCode.SUCCESS_NORMAL, data))
+        fun <T> created(data: T): ApiResult<T> = ApiResult.of(ErrorCode.SUCCESS_NORMAL, data)
 
-        fun ok(): ResponseEntity<ApiResult<*>> =
-            ResponseEntity.status(200).body(ApiResult.of(ErrorCode.SUCCESS_NORMAL))
+        fun ok(): ApiResult<*> = ApiResult.of(ErrorCode.SUCCESS_NORMAL)
 
-        fun <T> ok(data: T): ResponseEntity<ApiResult<T>> =
-            ResponseEntity.status(200).body(ApiResult.of(ErrorCode.SUCCESS_NORMAL, data))
+        fun <T> ok(data: T): ApiResult<T> = ApiResult.of(ErrorCode.SUCCESS_NORMAL, data)
 
-        fun error(): ResponseEntity<ApiResult<*>> =
-            ResponseEntity.status(200).body(ApiResult.of(ErrorCode.ERROR_SYSTEM))
+        fun error(): ApiResult<*> = ApiResult.of(ErrorCode.ERROR_SYSTEM)
     }
 }
