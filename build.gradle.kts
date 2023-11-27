@@ -14,9 +14,9 @@ plugins {
 
 gradlePlugin {
     plugins {
-        create("simplePlugin") { // java-gradle-plugin을 활용하여 플러그인 생성
+        create("simplePlugin") {
             id = "com.goyounha11.plugins"
-            implementationClass = "com.goyounha11.plugins.GreetingPlugin" // 구현체
+            implementationClass = "com.goyounha11.plugins.GenerateDocsPlugin"
         }
     }
 }
