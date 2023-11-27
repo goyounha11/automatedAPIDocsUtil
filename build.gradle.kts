@@ -6,12 +6,16 @@ plugins {
     id("io.spring.dependency-management") version "1.1.3"
     id("com.epages.restdocs-api-spec") version "0.18.2"
     id("org.hidetake.swagger.generator") version "2.19.2"
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
 }
 
 group = "com.goyounha11"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
+
+apply(from = "${rootDir}/scripts/publish-maven.gradle")
+apply(from = "${rootDir}/scripts/publish.gradle")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
