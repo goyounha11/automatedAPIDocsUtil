@@ -99,7 +99,7 @@
         ): List<ParameterDescriptorWithType> {
             return if (type == ParameterType.QUERY) {
                 request.parameterMap.map { (key, value) ->
-                    parameterWithName(key).description("Value: ${value.joinToString()}")
+                    parameterWithName(key).description("${value.joinToString()}")
                 }
             } else {
                 val uriVars = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as? Map<*, *>
