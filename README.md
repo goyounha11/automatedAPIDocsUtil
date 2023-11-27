@@ -43,7 +43,7 @@
     3rd param : Api description
     4th param : ResultAction for generate snippets
 ```
-- you can using gradle task
+### 4.you can using gradle task
 ```
     gradle openapi3 generateSwaggerUIConvert
 ```
