@@ -8,17 +8,6 @@ plugins {
     id("org.hidetake.swagger.generator") version "2.19.2"
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
-    `java-gradle-plugin`
-    `maven-publish`
-}
-
-gradlePlugin {
-    plugins {
-        create("simplePlugin") { // java-gradle-plugin을 활용하여 플러그인 생성
-            id = "com.goyounha11.plugins"
-            implementationClass = "com.goyounha11.plugins.GreetingPlugin" // 구현체
-        }
-    }
 }
 
 group = "com.goyounha11"
