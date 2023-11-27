@@ -11,11 +11,12 @@ plugins {
     kotlin("plugin.spring") version "1.8.22"
 }
 
-group = "com.goyounha11"
+group = "io.github.goyounha11"
 version = "0.0.1"
 
 apply(from = "${rootDir}/scripts/publish-maven.gradle")
-apply(from = "${rootDir}/scripts/publish.gradle")
+apply(from = "publish.gradle")
+
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17

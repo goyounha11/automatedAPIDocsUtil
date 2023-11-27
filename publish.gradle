@@ -1,0 +1,15 @@
+ext {
+    PUBLISH_GROUP_ID = 'io.github.goyounha11'
+    PUBLISH_VERSION = '0.0.1'
+    PUBLISH_ARTIFACT_ID = 'automatedAPIDocsUtil'
+    PUBLISH_DESCRIPTION = 'restdocs simple create util'
+    PUBLISH_URL = 'https://github.com/goyounha11/automatedAPIDocsUtil'
+    PUBLISH_LICENSE_NAME = 'GNU License'
+    PUBLISH_LICENSE_URL = 'https://github.com/goyounha11/automatedAPIDocsUtil/blob/main/LICENSE'
+    PUBLISH_DEVELOPER_ID = 'goyounha11'
+    PUBLISH_DEVELOPER_NAME = 'goyounha11'
+    PUBLISH_DEVELOPER_EMAIL = 'tlscjfgh93@gmail.com'
+    PUBLISH_SCM_CONNECTION = 'scm:git:github.com/goyounha11/automatedAPIDocsUtil.git'
+    PUBLISH_SCM_DEVELOPER_CONNECTION = 'scm:git:ssh://github.com:goyounha11/automatedAPIDocsUtil.git'
+    PUBLISH_SCM_URL = 'https://github.com/goyounha11/automatedAPIDocsUtil/tree/main'
+}
