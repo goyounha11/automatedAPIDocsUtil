@@ -1,5 +1,8 @@
 # Spring REST Docs API specification Integration
-
+## Gradle 
+```
+implementation 'io.github.goyounha11:automatedAPIDocsUtil:0.0.1'
+```
 ## How Use
 ### 1.your project setting epages restdocs
 ```https://github.com/ePages-de/restdocs-api-spec```
