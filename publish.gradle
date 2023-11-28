@@ -1,6 +1,6 @@
 ext {
     PUBLISH_GROUP_ID = 'io.github.goyounha11'
-    PUBLISH_VERSION = '0.0.1'
+    PUBLISH_VERSION = '0.0.2'
     PUBLISH_ARTIFACT_ID = 'automatedAPIDocsUtil'
     PUBLISH_DESCRIPTION = 'restdocs simple create util'
     PUBLISH_URL = 'https://github.com/goyounha11/automatedAPIDocsUtil'

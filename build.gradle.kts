@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.goyounha11"
-version = "0.0.1"
+version = "0.0.2"
 
 apply(from = "${rootDir}/scripts/publish-maven.gradle")
 apply(from = "publish.gradle")
@@ -34,8 +34,8 @@ configurations {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:3.1.5")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation ("org.springframework.restdocs:spring-restdocs-mockmvc")
