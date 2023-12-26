@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.goyounha11"
-version = "0.0.2"
+version = "0.0.3"
 
 apply(from = "${rootDir}/scripts/publish-maven.gradle")
 apply(from = "publish.gradle")
