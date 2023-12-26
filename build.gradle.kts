@@ -7,8 +7,8 @@ plugins {
     id("com.epages.restdocs-api-spec") version "0.18.2"
     id("org.hidetake.swagger.generator") version "2.19.2"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
-    kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
+    kotlin("jvm") version "1.8.22"
 }
 
 group = "io.github.goyounha11"

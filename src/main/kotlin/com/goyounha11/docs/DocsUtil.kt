@@ -32,6 +32,9 @@
             val requestFieldDescriptors = createFieldDescriptors(requestNode)
 
             val response = resultActions.andReturn().response
+
+            response.setDefaultCharacterEncoding("UTF-8")
+
             val responseNode: JsonNode? =
                 response.contentAsString.let { jacksonObjectMapper().readTree(response.contentAsString) }
             val responseFieldDescriptors = createFieldDescriptors(responseNode)
@@ -70,14 +73,19 @@
                     }
 
                     value.isArray -> {
-                        value.forEachIndexed { index, item ->
-                            if (item.isObject) {
-                                fieldDescriptors.addAll(createFieldDescriptors(item, "$path.[]."))
-                            } else {
-                                fieldDescriptors.add(
-                                    PayloadDocumentation.fieldWithPath("$path.[].")
-                                        .description("An element of $path at index $index")
-                                )
+                        when {
+                            value.isEmpty -> {
+                                fieldDescriptors.add(PayloadDocumentation.fieldWithPath("$path.[]").description("empty array"))
+                            }
+                            else -> value.forEachIndexed { index, item ->
+                                if (item.isObject) {
+                                    fieldDescriptors.addAll(createFieldDescriptors(item, "$path.[]."))
+                                } else {
+                                    fieldDescriptors.add(
+                                        PayloadDocumentation.fieldWithPath("$path.[].")
+                                            .description("An element of $path at index $index")
+                                    )
+                                }
                             }
                         }
                     }
