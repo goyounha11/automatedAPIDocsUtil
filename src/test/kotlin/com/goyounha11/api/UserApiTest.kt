@@ -1,6 +1,5 @@
 package com.goyounha11.api
 
-import com.epages.restdocs.apispec.RestDocumentationWrapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.goyounha11.api.dto.UserCreateRequest
 import com.goyounha11.docs.DocsUtil
