@@ -1,7 +1,10 @@
 package com.goyounha11.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.goyounha11.api.dto.Gender
+import com.goyounha11.api.dto.UserCreateData
 import com.goyounha11.api.dto.UserCreateRequest
+import com.goyounha11.api.dto.UserStatus
 import com.goyounha11.docs.DocsUtil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,7 +42,7 @@ internal class UserApiTest {
 
     @Test
     fun `회원 가입`() {
-        val req = UserCreateRequest("test@test.com", "1234", "테스터")
+        val req = UserCreateRequest("test@test.com", Gender.MALE,"1234", "테스터")
 
         val resultAction = mockMvc.perform(
             post("/user")
@@ -48,13 +51,17 @@ internal class UserApiTest {
         )
 
         resultAction.andExpectAll(
-            status().isCreated,
             jsonPath("$.code").value("S000"),
             jsonPath("$.message").value("success"),
             jsonPath("$.data.id").value(1L),
+            jsonPath("$.data.status").value(UserStatus.ACTIVE.name),
             jsonPath("$.data.email").value("test@test.com"),
             jsonPath("$.data.password").value("1234"),
-            jsonPath("$.data.nickname").value("테스터")
+            jsonPath("$.data.nickname").value("테스터"),
+            jsonPath("$.data.hobbies[*].name").isNotEmpty,
+            jsonPath("$.data.address.city").value("Seoul"),
+            jsonPath("$.data.address.street").value("Gangnam"),
+            jsonPath("$.data.address.zipcode").value(12345)
         )
 
         resultAction.andDo(
@@ -62,7 +69,9 @@ internal class UserApiTest {
                 "User",
                 "user/create",
                 "유저 회원가입 API",
-                resultAction
+                resultAction,
+                UserCreateRequest::class.java,
+                UserCreateData::class.java
             )
         )
     }

@@ -9,21 +9,10 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     kotlin("plugin.spring") version "1.8.22"
     kotlin("jvm") version "1.8.22"
-    `java-gradle-plugin`
-    `maven-publish`
-}
-
-gradlePlugin {
-    plugins {
-        create("simplePlugin") { // java-gradle-plugin을 활용하여 플러그인 생성
-            id = "com.goyounha11.plugins"
-            implementationClass = "com.goyounha11.plugins.GreetingPlugin" // 구현체
-        }
-    }
 }
 
 group = "io.github.goyounha11"
-version = "0.0.4"
+version = "0.0.5"
 
 apply(from = "${rootDir}/scripts/publish-maven.gradle")
 apply(from = "publish.gradle")
@@ -35,7 +24,6 @@ java {
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 configurations {
@@ -47,8 +35,12 @@ configurations {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:3.1.5")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
-//    implementation("io.github.Yaklede:empty-object-generator:0.2.1")
+
+    implementation ("com.github.therapi:therapi-runtime-javadoc:0.13.0")
+
+    annotationProcessor ("com.github.therapi:therapi-runtime-javadoc-scribe:0.13.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation ("org.springframework.restdocs:spring-restdocs-mockmvc")
