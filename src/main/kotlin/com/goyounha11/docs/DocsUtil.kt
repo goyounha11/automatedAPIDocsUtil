@@ -5,8 +5,13 @@ import com.epages.restdocs.apispec.ParameterDescriptorWithType
 import com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName
 import com.epages.restdocs.apispec.ResourceDocumentation.resource
 import com.epages.restdocs.apispec.ResourceSnippetParametersBuilder
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.goyounha11.core.reponse.ApiResult
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import org.springframework.mock.web.MockHttpServletRequest
@@ -22,11 +27,12 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmErasure
 
 object DocsUtil {
+    private val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+
     @JvmStatic
     fun createDocs(
         tag: String,
@@ -39,14 +45,19 @@ object DocsUtil {
         val resourceSnippetParametersBuilder = ResourceSnippetParametersBuilder().tags(tag).description(description)
 
         val request = resultActions.andReturn().request
-        val requestNode: JsonNode? = request.contentAsString?.let { jacksonObjectMapper().readTree(it) }
-        val requestFieldDescriptors = createFieldDescriptors(requestNode, requestClazz?.kotlin)
+        val requestNode: JsonNode? = request.contentAsString?.takeIf { it.isNotBlank() }?.let { objectMapper.readTree(it) }
+        val requestObject = requestNode?.let { objectMapper.treeToValue(it, requestClazz) }
+        val requestFieldDescriptors = createFieldDescriptors(requestObject, wrappedClazz = requestClazz?.kotlin)
 
         val response = resultActions.andReturn().response
         response.characterEncoding = "UTF-8"
 
-        val responseNode: JsonNode? = response.contentAsString.let { jacksonObjectMapper().readTree(it) }
-        val responseFieldDescriptors = createFieldDescriptors(responseNode, responseClazz?.kotlin)
+        val responseNode: JsonNode? = response.contentAsString.takeIf { it.isNotBlank() }?.let { objectMapper.readTree(it) }
+        val apiResultType = object : TypeReference<ApiResult<Any>>() {}
+        val responseObject: ApiResult<Any>? = responseNode?.let { objectMapper.readValue(it.toString(), apiResultType) }
+        val data = responseObject?.data
+
+        val responseFieldDescriptors = createFieldDescriptors(responseObject, ApiResult::class, responseClazz?.kotlin)
 
         val requestParameter = createParameters(request, ParameterType.QUERY)
         val requestPathParameter = createParameters(request, ParameterType.PATH)
@@ -65,42 +76,43 @@ object DocsUtil {
     }
 
     private fun createFieldDescriptors(
-        jsonNode: JsonNode?, clazz: KClass<*>?, parentPath: String = "", isInDataField: Boolean = false
+        obj: Any?, wrapperClazz: KClass<*>? = null, wrappedClazz: KClass<*>?, parentPath: String = ""
     ): List<FieldDescriptor> {
-        if (jsonNode == null) return emptyList()
+        if (obj == null) return emptyList()
 
         val fieldDescriptors = mutableListOf<FieldDescriptor>()
-        val iterator = jsonNode.fields()
+        val properties = wrapperClazz?.memberProperties ?: return emptyList()
 
-        while (iterator.hasNext()) {
-            val entry = iterator.next()
-            val key = entry.key
-            val value = entry.value
+        properties.forEach { property ->
+            val key = property.name
+            val value = if (obj is Map<*, *>) {
+                obj[key]
+            } else {
+                property.getter.call(obj)
+            }
             val path = if (parentPath.isEmpty()) key else "$parentPath.$key"
 
-            val property = clazz?.memberProperties?.find { it.name == key }
+            val childClazz = if (key == "data" && wrappedClazz != null) {
+                wrappedClazz
+            } else {
+                property.returnType.jvmErasure
+            }
 
-            val description = property?.let { createFieldDescription(it, value) } ?: createFieldDescription(null, value)
+            val description = createFieldDescription(property, value)
 
-            when {
-                value.isObject -> {
-                    val childIsInDataField = isInDataField || key == "data"
-                    val childClass = if (childIsInDataField) clazz else property?.returnType?.jvmErasure
-                    fieldDescriptors.addAll(createFieldDescriptors(value, childClass, path, childIsInDataField))
+            when (value) {
+                is Map<*, *> -> {
+                    fieldDescriptors.addAll(createFieldDescriptors(value, childClazz, wrappedClazz, path))
                 }
 
-                value.isArray -> {
-                    when {
-                        value.isEmpty -> {
-                            fieldDescriptors.add(PayloadDocumentation.fieldWithPath("$path.[]").description("empty array"))
-                        }
-
-                        else -> value.forEachIndexed { _, item ->
-                            if (item.isObject) {
-                                val childClass = if (isInDataField) clazz else property?.returnType?.jvmErasure
-                                fieldDescriptors.addAll(createFieldDescriptors(item, childClass, "$path.[].", isInDataField))
+                is Collection<*> -> {
+                    fieldDescriptors.add(PayloadDocumentation.fieldWithPath(path).type(JsonFieldType.ARRAY).description(description))
+                    if (value.isNotEmpty()) {
+                        value.forEachIndexed { index, item ->
+                            if (item is Map<*, *>) {
+                                fieldDescriptors.addAll(createFieldDescriptors(item, childClazz, wrappedClazz, "$path[$index]"))
                             } else {
-                                fieldDescriptors.add(PayloadDocumentation.fieldWithPath("$path.[].").description(description))
+                                fieldDescriptors.add(PayloadDocumentation.fieldWithPath("$path[$index]").description(description))
                             }
                         }
                     }
@@ -115,32 +127,13 @@ object DocsUtil {
         return fieldDescriptors
     }
 
-    private fun createFieldDescription(property: KProperty<*>?, value: JsonNode): String {
-        val typeDescriptor = if (property != null) TypeDescriptor(property.returnType.jvmErasure) else TypeDescriptor(value)
-        val annotations = property?.javaField?.annotations ?: emptyArray()
+    private fun createFieldDescription(property: KProperty<*>, value: Any?): String {
+        val typeDescriptor = TypeDescriptor(property.returnType.jvmErasure)
+        val annotations = property.javaField?.annotations ?: emptyArray()
         val required = isRequired(annotations)
 
-        val enumValues = if (property?.returnType?.jvmErasure?.isSubclassOf(Enum::class) == true) {
-            val enumConstants = property.returnType.jvmErasure.java.enumConstants
-            enumConstants.joinToString(", ") { enumConstant ->
-                if (enumConstant is Enum<*>) {
-                    val enumName = enumConstant.name
-                    val enumDescription =
-                        enumConstant.javaClass.kotlin.primaryConstructor?.parameters?.mapNotNull { param ->
-                            try {
-                                enumConstant.javaClass.getDeclaredField(param.name!!).let { field ->
-                                    field.isAccessible = true
-                                    field.get(enumConstant).toString()
-                                }
-                            } catch (e: Exception) {
-                                null
-                            }
-                        }?.joinToString(", ") ?: ""
-                    if (enumDescription.isNotEmpty()) "$enumName($enumDescription)" else enumName
-                } else {
-                    enumConstant.toString()
-                }
-            }
+        val enumValues = if (property.returnType.jvmErasure.isSubclassOf(Enum::class)) {
+            property.returnType.jvmErasure.java.enumConstants.joinToString(", ") { it.toString() }
         } else {
             ""
         }
@@ -151,7 +144,7 @@ object DocsUtil {
             if (enumValues.isNotEmpty()) {
                 append(" - [가능한 값: $enumValues]")
             }
-            append(" - ").append(value.asText())
+            append(" - ").append(value?.toString() ?: "")
         }
     }
 
@@ -174,32 +167,28 @@ object DocsUtil {
         PATH, QUERY
     }
 
-    private class TypeDescriptor {
-        private val fieldType: JsonFieldType
-
-        constructor(type: KClass<*>?) {
-            fieldType = when {
-                type == null -> JsonFieldType.VARIES
-                Number::class.isSuperclassOf(type) -> JsonFieldType.NUMBER
-                String::class.isSuperclassOf(type) -> JsonFieldType.STRING
-                Map::class.isSuperclassOf(type) -> JsonFieldType.OBJECT
-                Collection::class.isSuperclassOf(type) -> JsonFieldType.ARRAY
-                Boolean::class.isSuperclassOf(type) -> JsonFieldType.BOOLEAN
-                Enum::class.isSuperclassOf(type) -> JsonFieldType.STRING
-                else -> JsonFieldType.OBJECT
-            }
+    private class TypeDescriptor(type: KClass<*>?) {
+        private val fieldType: JsonFieldType = when {
+            type == null -> JsonFieldType.VARIES
+            Number::class.isSuperclassOf(type) -> JsonFieldType.NUMBER
+            String::class.isSuperclassOf(type) -> JsonFieldType.STRING
+            Map::class.isSuperclassOf(type) -> JsonFieldType.OBJECT
+            Collection::class.isSuperclassOf(type) -> JsonFieldType.ARRAY
+            Boolean::class.isSuperclassOf(type) -> JsonFieldType.BOOLEAN
+            Enum::class.isSuperclassOf(type) -> JsonFieldType.STRING
+            else -> JsonFieldType.OBJECT
         }
 
-        constructor(jsonNode: JsonNode) {
-            fieldType = when {
-                jsonNode.isNumber -> JsonFieldType.NUMBER
-                jsonNode.isTextual -> JsonFieldType.STRING
-                jsonNode.isObject -> JsonFieldType.OBJECT
-                jsonNode.isArray -> JsonFieldType.ARRAY
-                jsonNode.isBoolean -> JsonFieldType.BOOLEAN
-                else -> JsonFieldType.VARIES
+        constructor(jsonNode: JsonNode) : this(
+            when {
+                jsonNode.isNumber -> Number::class
+                jsonNode.isTextual -> String::class
+                jsonNode.isObject -> Map::class
+                jsonNode.isArray -> Collection::class
+                jsonNode.isBoolean -> Boolean::class
+                else -> null
             }
-        }
+        )
 
         override fun toString(): String {
             return when (fieldType) {

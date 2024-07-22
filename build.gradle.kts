@@ -39,6 +39,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
 
     implementation ("com.github.therapi:therapi-runtime-javadoc:0.13.0")
+    implementation ("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     annotationProcessor ("com.github.therapi:therapi-runtime-javadoc-scribe:0.13.0")
 
