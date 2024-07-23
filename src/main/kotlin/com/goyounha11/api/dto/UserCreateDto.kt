@@ -33,9 +33,7 @@ class UserCreateData(
     val password: String = password
     @field:NotBlank
     val nickname: String = nickname
-    @field:NotNull
     val address: UserAddressData = address
-    @field:NotNull
     val hobbies: List<HobbyData> = hobbies
 }
 
@@ -45,8 +43,11 @@ class HobbyData(
 )
 
 class UserAddressData(
+    @field:NotBlank
     val city: String,
+    @field:NotBlank
     val street: String,
+    @field:NotBlank
     val zipcode: Int
 )
 

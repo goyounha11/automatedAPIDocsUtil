@@ -40,6 +40,9 @@ dependencies {
 
     implementation ("com.github.therapi:therapi-runtime-javadoc:0.13.0")
     implementation ("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+    runtimeOnly("com.mysql:mysql-connector-j")
 
     annotationProcessor ("com.github.therapi:therapi-runtime-javadoc-scribe:0.13.0")
 

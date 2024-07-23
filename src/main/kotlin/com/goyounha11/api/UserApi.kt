@@ -3,9 +3,10 @@ package com.goyounha11.api
 import com.goyounha11.api.dto.*
 import com.goyounha11.core.reponse.ApiResult
 import com.goyounha11.core.reponse.Result
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-
 @RestController
 @RequestMapping("/user")
 class UserApi {
@@ -23,4 +24,26 @@ class UserApi {
                 mutableListOf(HobbyData("soccer"), HobbyData("baseball"), HobbyData("basketball"))
             ));
     }
+
+    @GetMapping
+    fun getUser(): ApiResult<PageImpl<UserCreateData>> {
+        val users = MutableList(10) { i ->
+            UserCreateData(
+                i.toLong(),
+                UserStatus.ACTIVE,
+                "test$i@gmail.com",
+                "1234",
+                "테스터$i",
+                UserAddressData("Seoul", "Gangnam", 12345),
+                mutableListOf(HobbyData("soccer"), HobbyData("baseball"), HobbyData("basketball"))
+            )
+        }
+
+
+        val pageRequest = PageRequest.of(0, 10)  // 페이지 번호와 페이지 크기
+        val userPage = PageImpl(users, pageRequest, users.size.toLong())
+
+        return Result.ok(userPage)
+    }
 }
+

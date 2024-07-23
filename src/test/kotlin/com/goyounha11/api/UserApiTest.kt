@@ -5,6 +5,7 @@ import com.goyounha11.api.dto.Gender
 import com.goyounha11.api.dto.UserCreateData
 import com.goyounha11.api.dto.UserCreateRequest
 import com.goyounha11.api.dto.UserStatus
+import com.goyounha11.core.reponse.ApiResult
 import com.goyounha11.docs.DocsUtil
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +17,9 @@ import org.springframework.http.MediaType
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -71,10 +74,31 @@ internal class UserApiTest {
                 "유저 회원가입 API",
                 resultAction,
                 UserCreateRequest::class.java,
-                UserCreateData::class.java,
-                "UserCreateRequest",
-                "UserCreateData"
+                UserCreateData::class.java
+//                "UserCreateRequest",
+//                "UserCreateData"
             )
         )
+    }
+
+    @Test
+    fun `유저 조회 성공`() {
+        val resultAction = mockMvc.perform(
+            get("/user")
+        )
+
+        resultAction.andDo(
+            DocsUtil.createDocs(
+                "User",
+                "{methodname}",
+                "유저 조회 API",
+                resultAction,
+                null,
+                UserCreateData::class.java
+//                "UserCreateRequest",
+//                "UserCreateData"
+            )
+        )
+
     }
 }
