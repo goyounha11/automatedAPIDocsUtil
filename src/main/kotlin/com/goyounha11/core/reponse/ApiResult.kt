@@ -1,11 +1,16 @@
 package com.goyounha11.core.reponse
 
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
 
 data class ApiResult<T>(
+    @field:NotBlank
     val code: String,
+    @field:NotBlank
     val message: String,
+    @field:NotNull
     val responseAt: LocalDateTime = LocalDateTime.now(),
     val data: T? = null
 ) {

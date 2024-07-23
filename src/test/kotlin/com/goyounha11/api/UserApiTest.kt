@@ -71,7 +71,9 @@ internal class UserApiTest {
                 "유저 회원가입 API",
                 resultAction,
                 UserCreateRequest::class.java,
-                UserCreateData::class.java
+                UserCreateData::class.java,
+                "UserCreateRequest",
+                "UserCreateData"
             )
         )
     }

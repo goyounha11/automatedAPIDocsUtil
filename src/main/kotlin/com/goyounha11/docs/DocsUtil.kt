@@ -5,6 +5,7 @@ import com.epages.restdocs.apispec.ParameterDescriptorWithType
 import com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName
 import com.epages.restdocs.apispec.ResourceDocumentation.resource
 import com.epages.restdocs.apispec.ResourceSnippetParametersBuilder
+import com.epages.restdocs.apispec.Schema
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -40,7 +41,9 @@ object DocsUtil {
         description: String,
         resultActions: ResultActions,
         requestClazz: Class<*>? = null,
-        responseClazz: Class<*>? = null
+        responseClazz: Class<*>? = null,
+        requestSchema: String? = null,
+        responseSchema: String? = null
     ): RestDocumentationResultHandler {
         val resourceSnippetParametersBuilder = ResourceSnippetParametersBuilder().tags(tag).description(description)
 
@@ -65,6 +68,16 @@ object DocsUtil {
         resourceSnippetParametersBuilder.queryParameters(requestParameter)
         resourceSnippetParametersBuilder.pathParameters(requestPathParameter)
         resourceSnippetParametersBuilder.responseFields(responseFieldDescriptors)
+
+        resourceSnippetParametersBuilder.apply {
+            requestSchema?.let { schema ->
+                requestSchema(Schema(schema))
+            }
+
+            responseSchema?.let { schema ->
+                responseSchema(Schema(schema))
+            }
+        }
 
         return document(
             identifier,
