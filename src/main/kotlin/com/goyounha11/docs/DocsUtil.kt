@@ -55,7 +55,6 @@ object DocsUtil {
         val responseNode: JsonNode? = response.contentAsString.takeIf { it.isNotBlank() }?.let { objectMapper.readTree(it) }
         val apiResultType = object : TypeReference<ApiResult<Any>>() {}
         val responseObject: ApiResult<Any>? = responseNode?.let { objectMapper.readValue(it.toString(), apiResultType) }
-        val data = responseObject?.data
 
         val responseFieldDescriptors = createFieldDescriptors(responseObject, ApiResult::class, responseClazz?.kotlin)
 
@@ -81,7 +80,7 @@ object DocsUtil {
         if (obj == null) return emptyList()
 
         val fieldDescriptors = mutableListOf<FieldDescriptor>()
-        val properties = wrapperClazz?.memberProperties ?: return emptyList()
+        val properties = wrapperClazz?.memberProperties ?: obj::class.memberProperties
 
         properties.forEach { property ->
             val key = property.name
