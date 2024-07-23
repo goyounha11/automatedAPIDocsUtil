@@ -38,7 +38,9 @@ object DocsUtil {
         description: String,
         resultActions: ResultActions,
         requestClazz: Class<*>? = null,
-        responseClazz: Class<*>? = null
+        responseClazz: Class<*>? = null,
+        requestSchema: String? = null,
+        responseSchema: String? = null
     ): RestDocumentationResultHandler {
         val resourceSnippetParametersBuilder =
             ResourceSnippetParametersBuilder().tags(tag).description(description)
@@ -54,6 +56,16 @@ object DocsUtil {
         val responseNode: JsonNode? =
             response.contentAsString.let { jacksonObjectMapper().readTree(it) }
         val responseFieldDescriptors = createFieldDescriptors(responseNode, responseClazz?.kotlin)
+
+        resourceSnippetParametersBuilder.apply {
+            requestSchema?.let { schema ->
+                requestSchema(Schema(schema))
+            }
+
+            responseSchema?.let { schema ->
+                responseSchema(Schema(schema))
+            }
+        }
 
         val requestParameter = createParameters(request, ParameterType.QUERY)
         val requestPathParameter = createParameters(request, ParameterType.PATH)
