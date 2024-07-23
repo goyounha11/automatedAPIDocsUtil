@@ -108,11 +108,11 @@ object DocsUtil {
                 is Collection<*> -> {
                     fieldDescriptors.add(PayloadDocumentation.fieldWithPath(path).type(JsonFieldType.ARRAY).description(description))
                     if (value.isNotEmpty()) {
-                        value.forEachIndexed { index, item ->
+                        value.forEach {item ->
                             if (item is Map<*, *>) {
-                                fieldDescriptors.addAll(createFieldDescriptors(item, childClazz, wrappedClazz, "$path[$index]"))
+                                fieldDescriptors.add(PayloadDocumentation.fieldWithPath("$path[].${item.keys.first()}").description(description))
                             } else {
-                                fieldDescriptors.add(PayloadDocumentation.fieldWithPath("$path[$index]").description(description))
+                                fieldDescriptors.add(PayloadDocumentation.fieldWithPath("$path[]").description(description))
                             }
                         }
                     }
