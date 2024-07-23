@@ -106,7 +106,7 @@ object DocsUtil {
                     fieldDescriptors.addAll(
                         createFieldDescriptors(
                             value,
-                            childClass,
+                            childClass ?: clazz,
                             path,
                             childIsInDataField
                         )
@@ -117,7 +117,7 @@ object DocsUtil {
                     when {
                         value.isEmpty -> {
                             fieldDescriptors.add(
-                                PayloadDocumentation.fieldWithPath("$path.[]")
+                                PayloadDocumentation.fieldWithPath("$path[]")
                                     .description("empty array")
                             )
                         }
@@ -130,14 +130,14 @@ object DocsUtil {
                                     fieldDescriptors.addAll(
                                         createFieldDescriptors(
                                             item,
-                                            itemClass,
-                                            "$path.[].",
+                                            itemClass ?: clazz,
+                                            "$path[]",
                                             isInDataField
                                         )
                                     )
                                 } else {
                                     fieldDescriptors.add(
-                                        PayloadDocumentation.fieldWithPath("$path.[].")
+                                        PayloadDocumentation.fieldWithPath("$path[]")
                                             .description(description)
                                     )
                                 }
