@@ -73,8 +73,8 @@ internal class UserApiTest {
                 "user/create",
                 "유저 회원가입 API",
                 resultAction,
-                UserCreateRequest::class.java,
-                UserCreateData::class.java
+                requestClazz = UserCreateRequest::class.java,
+                responseClazz = UserCreateData::class.java
 //                "UserCreateRequest",
 //                "UserCreateData"
             )
@@ -93,8 +93,8 @@ internal class UserApiTest {
                 "{methodname}",
                 "유저 조회 API",
                 resultAction,
-                null,
-                UserCreateData::class.java
+                requestClazz = null,
+                responseClazz = UserCreateData::class.java
 //                "UserCreateRequest",
 //                "UserCreateData"
             )

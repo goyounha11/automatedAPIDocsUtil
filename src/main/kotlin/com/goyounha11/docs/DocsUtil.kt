@@ -37,10 +37,9 @@ object DocsUtil {
         identifier: String,
         description: String,
         resultActions: ResultActions,
+        parameterDescriptor: List<ParameterDescriptorWithType> = emptyList(),
         requestClazz: Class<*>? = null,
-        responseClazz: Class<*>? = null,
-        requestSchema: String? = null,
-        responseSchema: String? = null
+        responseClazz: Class<*>? = null
     ): RestDocumentationResultHandler {
         val resourceSnippetParametersBuilder =
             ResourceSnippetParametersBuilder().tags(tag).description(description)
@@ -58,16 +57,16 @@ object DocsUtil {
         val responseFieldDescriptors = createFieldDescriptors(responseNode, responseClazz?.kotlin)
 
         resourceSnippetParametersBuilder.apply {
-            requestSchema?.let { schema ->
-                requestSchema(Schema(schema))
+            requestClazz?.let { schema ->
+                requestSchema(Schema(schema.simpleName))
             }
 
-            responseSchema?.let { schema ->
-                responseSchema(Schema(schema))
+            responseClazz?.let { schema ->
+                responseSchema(Schema(schema.simpleName))
             }
         }
 
-        val requestParameter = createParameters(request, ParameterType.QUERY)
+        val requestParameter = parameterDescriptor.ifEmpty { createParameters(request, ParameterType.QUERY) }
         val requestPathParameter = createParameters(request, ParameterType.PATH)
 
         resourceSnippetParametersBuilder.requestFields(requestFieldDescriptors)
@@ -217,7 +216,11 @@ object DocsUtil {
     ): List<ParameterDescriptorWithType> {
         return if (type == ParameterType.QUERY) {
             request.parameterMap.map { (key, value) ->
-                parameterWithName(key).description(value.joinToString())
+                if (value.joinToString().isNullOrBlank()) {
+                    parameterWithName(key).description(value.joinToString()).optional()
+                } else {
+                    parameterWithName(key).description(value.joinToString())
+                }
             }
         } else {
             val uriVars =

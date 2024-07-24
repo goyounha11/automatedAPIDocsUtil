@@ -15,7 +15,7 @@ data class ApiResult<T>(
     val data: T? = null
 ) {
     companion object {
-        fun of(exceptionCode: ErrorCode): ApiResult<*> {
+        fun of(exceptionCode: ErrorCode): ApiResult<Unit> {
             return of(exceptionCode, null)
         }
 

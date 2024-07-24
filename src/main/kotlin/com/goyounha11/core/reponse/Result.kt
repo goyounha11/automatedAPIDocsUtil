@@ -9,10 +9,10 @@ class Result {
 
         fun <T> created(data: T): ApiResult<T> = ApiResult.of(ErrorCode.SUCCESS_NORMAL, data)
 
-        fun ok(): ApiResult<*> = ApiResult.of(ErrorCode.SUCCESS_NORMAL)
+        fun ok(): ApiResult<Unit> = ApiResult.of(ErrorCode.SUCCESS_NORMAL)
 
         fun <T> ok(data: T): ApiResult<T> = ApiResult.of(ErrorCode.SUCCESS_NORMAL, data)
 
-        fun error(): ApiResult<*> = ApiResult.of(ErrorCode.ERROR_SYSTEM)
+        fun error(): ApiResult<Unit> = ApiResult.of(ErrorCode.ERROR_SYSTEM)
     }
 }
