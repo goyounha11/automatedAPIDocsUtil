@@ -58,15 +58,16 @@ object DocsUtil {
 
         resourceSnippetParametersBuilder.apply {
             requestClazz?.let { schema ->
-                requestSchema(Schema(schema.simpleName))
+                requestSchema(Schema(schema.canonicalName))
             }
 
             responseClazz?.let { schema ->
-                responseSchema(Schema(schema.simpleName))
+                responseSchema(Schema(schema.canonicalName))
             }
         }
 
-        val requestParameter = parameterDescriptor.ifEmpty { createParameters(request, ParameterType.QUERY) }
+        val requestParameter =
+            parameterDescriptor.ifEmpty { createParameters(request, ParameterType.QUERY) }
         val requestPathParameter = createParameters(request, ParameterType.PATH)
 
         resourceSnippetParametersBuilder.requestFields(requestFieldDescriptors)
@@ -110,7 +111,8 @@ object DocsUtil {
             when {
                 value.isObject -> {
                     val childIsInDataField = isInDataField || key == "data"
-                    var childClass = if (childIsInDataField) clazz else property?.returnType?.jvmErasure
+                    var childClass =
+                        if (childIsInDataField) clazz else property?.returnType?.jvmErasure
 
                     if (path.startsWith("data.")) childClass = property?.returnType?.jvmErasure
 
@@ -276,5 +278,92 @@ object DocsUtil {
 
     private fun isRequired(annotations: Array<Annotation>): Boolean {
         return annotations.any { it.annotationClass == NotNull::class || it.annotationClass == NotBlank::class }
+    }
+
+    /**
+     * 오버로딩 for java
+     * response, request class가 없는 경우
+     * queryparameter가 없는 경우
+     */
+    @JvmStatic
+    fun createDocs(
+        tag: String,
+        identifier: String,
+        description: String,
+        resultActions: ResultActions
+    ): RestDocumentationResultHandler {
+        return createDocs(tag, identifier, description, resultActions, emptyList(), null, null);
+    }
+
+    /**
+     * 오버로딩 for java
+     * queryparameter가 없는 경우
+     */
+    @JvmStatic
+    fun createDocs(
+        tag: String,
+        identifier: String,
+        description: String,
+        resultActions: ResultActions,
+        requestClazz: Class<*>? = null,
+        responseClazz: Class<*>? = null
+    ): RestDocumentationResultHandler {
+        return createDocs(
+            tag,
+            identifier,
+            description,
+            resultActions,
+            parameterDescriptor = emptyList(),
+            requestClazz = requestClazz,
+            responseClazz = responseClazz
+        )
+    }
+
+    /**
+     * 오버로딩 for java
+     * request class가 없는 경우
+     */
+    @JvmStatic
+    fun createDocs(
+        tag: String,
+        identifier: String,
+        description: String,
+        resultActions: ResultActions,
+        parameterDescriptor: List<ParameterDescriptorWithType>,
+        responseClazz: Class<*>? = null
+    ): RestDocumentationResultHandler {
+        return createDocs(
+            tag,
+            identifier,
+            description,
+            resultActions,
+            parameterDescriptor = parameterDescriptor,
+            requestClazz = null,
+            responseClazz = responseClazz
+        )
+    }
+
+    /**
+     * 오버로딩 for java
+     * request class가 없는 경우
+     * queryparameter가 없는 경우
+     */
+    @JvmStatic
+    fun createDocs(
+        tag: String,
+        identifier: String,
+        description: String,
+        resultActions: ResultActions,
+        responseClazz: Class<*>? = null
+    ): RestDocumentationResultHandler {
+        return createDocs(
+            tag,
+            identifier,
+            description,
+            resultActions,
+            parameterDescriptor = emptyList(),
+            requestClazz = null,
+            responseClazz = responseClazz
+        )
     }
 }

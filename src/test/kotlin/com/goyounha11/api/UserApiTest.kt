@@ -36,16 +36,23 @@ internal class UserApiTest {
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
-    fun setUp(webApplicationContext: WebApplicationContext, restDocumentation: RestDocumentationContextProvider) {
+    fun setUp(
+        webApplicationContext: WebApplicationContext,
+        restDocumentation: RestDocumentationContextProvider
+    ) {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
             .addFilter<DefaultMockMvcBuilder>(CharacterEncodingFilter("UTF-8", true))
-            .apply<DefaultMockMvcBuilder>(MockMvcRestDocumentation.documentationConfiguration(restDocumentation))
+            .apply<DefaultMockMvcBuilder>(
+                MockMvcRestDocumentation.documentationConfiguration(
+                    restDocumentation
+                )
+            )
             .build()
     }
 
     @Test
     fun `회원 가입`() {
-        val req = UserCreateRequest("test@test.com", Gender.MALE,"1234", "테스터")
+        val req = UserCreateRequest("test@test.com", Gender.MALE, "1234", "테스터")
 
         val resultAction = mockMvc.perform(
             post("/user")
@@ -75,8 +82,22 @@ internal class UserApiTest {
                 resultAction,
                 requestClazz = UserCreateRequest::class.java,
                 responseClazz = UserCreateData::class.java
-//                "UserCreateRequest",
-//                "UserCreateData"
+            )
+        )
+    }
+
+    @Test
+    fun `유저 단건 조회 성공`() {
+        val resultAction = mockMvc.perform(
+            get("/user/{id}", 1)
+        )
+
+        resultAction.andDo(
+            DocsUtil.createDocs(
+                "User",
+                "{methodname}",
+                "유저 단건 조회 API",
+                resultAction
             )
         )
     }
@@ -95,8 +116,6 @@ internal class UserApiTest {
                 resultAction,
                 requestClazz = null,
                 responseClazz = UserCreateData::class.java
-//                "UserCreateRequest",
-//                "UserCreateData"
             )
         )
 

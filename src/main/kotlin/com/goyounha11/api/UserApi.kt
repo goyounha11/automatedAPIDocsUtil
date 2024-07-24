@@ -25,6 +25,11 @@ class UserApi {
             ));
     }
 
+    @GetMapping("/{id}")
+    fun getUser(@PathVariable id: Long): ApiResult<Unit> {
+        return Result.ok()
+    }
+
     @GetMapping
     fun getUser(): ApiResult<PageImpl<UserCreateData>> {
         val users = MutableList(10) { i ->
